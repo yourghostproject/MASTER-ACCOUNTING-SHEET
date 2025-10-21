@@ -76,14 +76,14 @@
         <!-- PRICING TABLE -->
         <div class="lg:col-span-1">
           <h2 class="text-3xl font-semibold mb-6">Choose Your Tracks</h2>
-          <p class="text-white/80 mb-4">Each track includes exclusive rights, short edits for reels, and extended loops for lives. Scale up with more tracks.</p>
+          <p class="text-white/80 mb-4">Each track includes exclusive rights, short edits for reels, and extended loops for lives.</p>
           <div class="paper rounded-2xl p-6 card">
             <table class="w-full text-sm">
               <thead>
                 <tr class="border-b border-white/10">
                   <th class="text-left py-3"># Tracks</th>
                   <th class="text-right py-3">Price</th>
-                  <th class="text-right py-3">Agency (5+)</th>
+                  <th class="text-right py-3">Agency</th>
                 </tr>
               </thead>
               <tbody>
@@ -97,15 +97,10 @@
                   <td class="text-right font-semibold" id="price2">$149</td>
                   <td class="text-right text-green-400">$119</td>
                 </tr>
-                <tr class="border-b border-white/5">
+                <tr>
                   <td class="py-3">3 Tracks</td>
                   <td class="text-right font-semibold" id="price3">$199</td>
                   <td class="text-right text-green-400">$159</td>
-                </tr>
-                <tr>
-                  <td class="py-3">Up to 10 Tracks</td>
-                  <td class="text-right font-semibold" id="bulkPrice">$499</td>
-                  <td class="text-right text-green-400" id="bulkAgencyPrice">$399</td>
                 </tr>
               </tbody>
             </table>
@@ -118,15 +113,15 @@
                 <li><strong>Extended Loops:</strong> Seamless 10/20/30/60 min versions for OF lives/PPVs</li>
                 <li><strong>Files:</strong> WAV/MP3 + stems</li>
               </ul>
-              <p class="text-white/60 text-xs mt-4">Agencies: 20% off for 5+ tracks total. Custom quotes for 20+.</p>
+              <p class="text-white/60 text-xs mt-4">Agencies get 20% off automatically.</p>
             </div>
           </div>
         </div>
 
-        <!-- ENHANCED FORM WITH CALCULATOR -->
+        <!-- ENHANCED FORM -->
         <div class="lg:col-span-2">
           <h2 class="text-3xl font-semibold">Submit Your Brief</h2>
-          <p class="text-white/80 mt-2">Describe your vibe(s)—one per track. Agencies: Note bulk needs. <strong>Pay only if you approve the preview.</strong></p>
+          <p class="text-white/80 mt-2">Describe your vibe(s)—one per track. <strong>Pay only if you approve the preview.</strong></p>
 
           <form id="briefForm" class="mt-8 grid gap-4 paper rounded-2xl p-6 card" method="POST">
             <input type="text" name="_gotcha" class="hidden" tabindex="-1" autocomplete="off" />
@@ -138,7 +133,7 @@
             
             <select name="type" id="userType" class="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10">
               <option value="creator">Individual Creator</option>
-              <option value="agency">Agency (Bulk Request)</option>
+              <option value="agency">Agency (20% Off)</option>
             </select>
             
             <input name="roster_size" placeholder="Roster Size (if agency)" class="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10" />
@@ -147,26 +142,18 @@
             <!-- PACKAGE SELECTION -->
             <fieldset class="grid sm:grid-cols-3 gap-3">
               <label class="flex items-center gap-2 px-4 py-3 rounded-xl bg-black/40 border border-white/10 cursor-pointer">
-                <input type="radio" name="package" value="1-track-99" required />
+                <input type="radio" name="package" value="1-track" required />
                 <span>1 Track <span class="font-semibold" id="radioPrice1">$99</span></span>
               </label>
               <label class="flex items-center gap-2 px-4 py-3 rounded-xl bg-black/40 border border-white/10 cursor-pointer">
-                <input type="radio" name="package" value="2-tracks-149" />
+                <input type="radio" name="package" value="2-tracks" />
                 <span>2 Tracks <span class="font-semibold" id="radioPrice2">$149</span></span>
               </label>
               <label class="flex items-center gap-2 px-4 py-3 rounded-xl bg-black/40 border border-white/10 cursor-pointer">
-                <input type="radio" name="package" value="3-tracks-199" />
+                <input type="radio" name="package" value="3-tracks" />
                 <span>3 Tracks <span class="font-semibold" id="radioPrice3">$199</span></span>
               </label>
             </fieldset>
-
-            <!-- BULK CALCULATOR (Hidden until 10-track selected) -->
-            <div id="bulkCalculator" class="grid sm:grid-cols-2 gap-4 hide">
-              <input type="number" id="trackCount" name="track_count" min="4" max="10" placeholder="Number of tracks (4-10)" class="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10" />
-              <div class="flex items-center gap-2 px-4 py-3 rounded-xl bg-black/40 border border-white/10">
-                <span class="text-sm">Total: $<span id="dynamicPrice">0</span></span>
-              </div>
-            </div>
 
             <textarea name="brief" required placeholder="Vibe/tempo/energy, instruments, usage (teasers/lives/PPV), references…" class="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 min-h-[130px]"></textarea>
             <input name="reference_link" type="url" placeholder="Reference track (optional)" class="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10" />
@@ -190,8 +177,8 @@
       <h2 class="text-3xl font-semibold text-center mb-12">Agency Partnership Perks</h2>
       <div class="grid md:grid-cols-2 gap-8">
         <div class="card rounded-2xl p-6 paper text-center">
-          <h3 class="text-xl font-semibold mb-3">Bulk Pricing</h3>
-          <p class="text-white/70">20% off for 5+ creators. Custom rates for 20+.</p>
+          <h3 class="text-xl font-semibold mb-3">20% Off All Packages</h3>
+          <p class="text-white/70">Automatic discount applied in form.</p>
         </div>
         <div class="card rounded-2xl p-6 paper text-center">
           <h3 class="text-xl font-semibold mb-3">White-Label</h3>
@@ -256,10 +243,10 @@
       <div class="mt-6 divide-y divide-white/10 space-y-4">
         <details class="group py-4">
           <summary class="flex items-center justify-between cursor-pointer">
-            <span class="font-medium">Agency bulk pricing?</span>
+            <span class="font-medium">Agency discount?</span>
             <span class="text-white/50 group-open:rotate-180 transition">⌄</span>
           </summary>
-          <p class="text-white/70 mt-3">20% off for 5+ creators ($79/$119/$159). Custom rates for 20+.</p>
+          <p class="text-white/70 mt-3">20% off automatically applied when you select "Agency" ($79/$119/$159).</p>
         </details>
         <details class="group py-4">
           <summary class="flex items-center justify-between cursor-pointer">
@@ -273,7 +260,7 @@
             <span class="font-medium">How does payment work?</span>
             <span class="text-white/50 group-open:rotate-180 transition">⌄</span>
           </summary>
-          <p class="text-white/70 mt-3">You only pay if you love the result. I'll send a private preview. If you approve, I send a payment link for your selected package, then deliver the full files.</p>
+          <p class="text-white/70 mt-3">You only pay if you love the result. I'll send a private preview. If you approve, I send a payment link, then deliver the full files.</p>
         </details>
         <details class="group py-4">
           <summary class="flex items-center justify-between cursor-pointer">
@@ -296,7 +283,7 @@
             <span class="font-medium">Will I get ContentID/DMCA claims?</span>
             <span class="text-white/50 group-open:rotate-180 transition">⌄</span>
           </summary>
-          <p class="text-white/70 mt-3">No. I avoid public ContentID registration for these releases and provide whitelisting where needed. If a platform flags it by mistake, contact me and I'll handle it.</p>
+          <p class="text-white/70 mt-3">No. I avoid public ContentID registration for these releases and provide whitelisting where needed.</p>
         </details>
         <details class="group py-4">
           <summary class="flex items-center justify-between cursor-pointer">
@@ -304,7 +291,7 @@
             <span class="text-white/50 group-open:rotate-180 transition">⌄</span>
           </summary>
           <p class="text-white/70 mt-3">
-            Exclusive license for your channels (OnlyFans, IG, TikTok, YouTube), including paid ads. No redistribution/resale. Provide your channel handles if platform whitelisting is required.
+            Exclusive license for your channels (OnlyFans, IG, TikTok, YouTube), including paid ads. No redistribution/resale.
           </p>
         </details>
       </div>
@@ -374,38 +361,6 @@
         radioPrice3.textContent = '$199';
       }
     });
-
-    // SMART PRICE CALCULATOR
-    const packageRadios = document.querySelectorAll('input[name="package"]');
-    const bulkCalculator = document.getElementById('bulkCalculator');
-    const trackCountInput = document.getElementById('trackCount');
-    const dynamicPrice = document.getElementById('dynamicPrice');
-    const bulkPriceCell = document.getElementById('bulkPrice');
-    const bulkAgencyPriceCell = document.getElementById('bulkAgencyPrice');
-
-    packageRadios.forEach(radio => {
-      radio.addEventListener('change', function() {
-        if (this.value.includes('bulk')) {
-          bulkCalculator.classList.remove('hide');
-          calculateBulkPrice();
-        } else {
-          bulkCalculator.classList.add('hide');
-        }
-      });
-    });
-
-    trackCountInput.addEventListener('input', calculateBulkPrice);
-
-    function calculateBulkPrice() {
-      const count = parseInt(trackCountInput.value) || 0;
-      if (count >= 4 && count <= 10) {
-        const basePrice = 99 * count * 0.8; // 20% bulk discount
-        const agencyPrice = basePrice * 0.8; // Additional 20% for agencies
-        dynamicPrice.textContent = Math.round(basePrice);
-        bulkPriceCell.textContent = `$${Math.round(basePrice)}`;
-        bulkAgencyPriceCell.textContent = `$${Math.round(agencyPrice)}`;
-      }
-    }
 
     // Testimonials
     const testimonials = [
