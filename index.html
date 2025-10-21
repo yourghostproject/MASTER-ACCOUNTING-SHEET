@@ -97,10 +97,15 @@
                   <td class="text-right font-semibold">$149</td>
                   <td class="text-right text-green-400">$119</td>
                 </tr>
-                <tr>
+                <tr class="border-b border-white/5">
                   <td class="py-3">3 Tracks</td>
                   <td class="text-right font-semibold">$199</td>
                   <td class="text-right text-green-400">$159</td>
+                </tr>
+                <tr>
+                  <td class="py-3">Up to 10 Tracks</td>
+                  <td class="text-right font-semibold" id="bulkPrice">$499</td>
+                  <td class="text-right text-green-400" id="bulkAgencyPrice">$399</td>
                 </tr>
               </tbody>
             </table>
@@ -118,7 +123,7 @@
           </div>
         </div>
 
-        <!-- ENHANCED FORM -->
+        <!-- ENHANCED FORM WITH CALCULATOR -->
         <div class="lg:col-span-2">
           <h2 class="text-3xl font-semibold">Submit Your Brief</h2>
           <p class="text-white/80 mt-2">Describe your vibe(s)—one per track. Agencies: Note bulk needs. <strong>Pay only if you approve the preview.</strong></p>
@@ -139,6 +144,7 @@
             <input name="roster_size" placeholder="Roster Size (if agency)" class="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10" />
             <input name="handles" placeholder="Creator handle or Agency name" class="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10" />
 
+            <!-- PACKAGE SELECTION -->
             <fieldset class="grid sm:grid-cols-3 gap-3">
               <label class="flex items-center gap-2 px-4 py-3 rounded-xl bg-black/40 border border-white/10 cursor-pointer">
                 <input type="radio" name="package" value="1-track-99" required />
@@ -153,6 +159,14 @@
                 <span>3 Tracks <span class="font-semibold">$199</span></span>
               </label>
             </fieldset>
+
+            <!-- BULK CALCULATOR (Hidden until 10-track selected) -->
+            <div id="bulkCalculator" class="grid sm:grid-cols-2 gap-4 hide">
+              <input type="number" id="trackCount" name="track_count" min="4" max="10" placeholder="Number of tracks (4-10)" class="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10" />
+              <div class="flex items-center gap-2 px-4 py-3 rounded-xl bg-black/40 border border-white/10">
+                <span class="text-sm">Total: $<span id="dynamicPrice">0</span></span>
+              </div>
+            </div>
 
             <textarea name="brief" required placeholder="Vibe/tempo/energy, instruments, usage (teasers/lives/PPV), references…" class="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 min-h-[130px]"></textarea>
             <input name="reference_link" type="url" placeholder="Reference track (optional)" class="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10" />
@@ -187,9 +201,14 @@
     </div>
   </section>
 
-  <!-- WHY ME -->
+  <!-- WHY US? -->
   <section id="whyme" class="bg-[#0b0c0e] py-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-semibold">Why Us?</h2>
+        <p class="text-white/70 mt-4 max-w-2xl mx-auto">London-based producer with 10+ years crafting beats for premium creators. Every track is built to boost your engagement, retention, and revenue.</p>
+      </div>
+      
       <div class="grid md:grid-cols-3 gap-6">
         <div class="card rounded-2xl p-6 paper">
           <p class="text-sm uppercase tracking-wider text-white/60">Built for</p>
@@ -327,7 +346,39 @@
     // Year
     document.getElementById('year').textContent = new Date().getFullYear();
 
-    // Testimonials (Generic agency names removed)
+    // SMART PRICE CALCULATOR
+    const packageRadios = document.querySelectorAll('input[name="package"]');
+    const bulkCalculator = document.getElementById('bulkCalculator');
+    const trackCountInput = document.getElementById('trackCount');
+    const dynamicPrice = document.getElementById('dynamicPrice');
+    const bulkPriceCell = document.getElementById('bulkPrice');
+    const bulkAgencyPriceCell = document.getElementById('bulkAgencyPrice');
+
+    packageRadios.forEach(radio => {
+      radio.addEventListener('change', function() {
+        if (this.value === 'bulk-10tracks') {
+          bulkCalculator.classList.remove('hide');
+          calculateBulkPrice();
+        } else {
+          bulkCalculator.classList.add('hide');
+        }
+      });
+    });
+
+    trackCountInput.addEventListener('input', calculateBulkPrice);
+
+    function calculateBulkPrice() {
+      const count = parseInt(trackCountInput.value) || 0;
+      if (count >= 4 && count <= 10) {
+        const basePrice = 99 * count * 0.8; // 20% bulk discount
+        const agencyPrice = basePrice * 0.8; // Additional 20% for agencies
+        dynamicPrice.textContent = Math.round(basePrice);
+        bulkPriceCell.textContent = `$${Math.round(basePrice)}`;
+        bulkAgencyPriceCell.textContent = `$${Math.round(agencyPrice)}`;
+      }
+    }
+
+    // Testimonials
     const testimonials = [
       { quote: "Loop is so clean it feels infinite. No awkward cuts mid tease 😂", author: "— Ava • OF creator. Los Angeles" },
       { quote: "I wanted sexy but not cheesy. He nailed the tone and the loop just… works.", author: "— Leandra • OF creator. Paris" },
