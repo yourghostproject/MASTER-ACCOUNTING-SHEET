@@ -8,8 +8,6 @@
   <meta name="theme-color" content="#4B2142" />
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Calendly -->
-  <script src="https://assets.calendly.com/assets/external/widget.js" type="text/javascript" async></script>
   <style>
     /* ---- Visual system ---- */
     .grad-dark { background: radial-gradient(800px 300px at 10% 10%, #F6E7EB10, transparent), linear-gradient(135deg,#4B2142 0%, #0b0b0c 40%, #000 100%); }
@@ -22,8 +20,6 @@
     .hide { display:none; }
     .success { background: #16a34a20; border: 1px solid #16a34a60; color:#86efac; }
     .error { background: #b91c1c20; border: 1px solid #b91c1c60; color:#fecaca; }
-    /* Audio player styling */
-    .audio-player { background: rgba(255,255,255,0.05); border-radius: 12px; padding: 12px; }
   </style>
 </head>
 <body class="bg-[#0b0b0c] text-white antialiased">
@@ -40,9 +36,8 @@
       <nav class="hidden md:flex items-center gap-6 text-sm">
         <a href="#custom" class="hover:text-[#F6E7EB]">Packages</a>
         <a href="#agency" class="hover:text-[#F6E7EB]">Agencies</a>
-        <a href="#demos" class="hover:text-[#F6E7EB]">Demos</a>
         <a href="#faq" class="hover:text-[#F6E7EB]">FAQ</a>
-        <a href="#contact" class="px-4 py-2 rounded-xl bg-white text-black font-semibold">Book Demo</a>
+        <a href="#contact" class="px-4 py-2 rounded-xl bg-white text-black font-semibold">Contact</a>
       </nav>
     </div>
   </header>
@@ -74,68 +69,51 @@
     </div>
   </section>
 
-  <!-- AUDIO DEMOS -->
-  <section id="demos" class="bg-[#0f0d16] py-16">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h2 class="text-3xl font-semibold text-center mb-12">Hear the Difference</h2>
-      <div class="grid md:grid-cols-3 gap-8">
-        <div class="audio-player">
-          <h3 class="font-semibold mb-2">Sultry R&B Loop</h3>
-          <p class="text-white/70 text-sm mb-3">Perfect for teasers & intimate content</p>
-          <iframe width="100%" height="52" scrolling="no" frameborder="no" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/1784567890&color=%23ff5500&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true"></iframe>
-        </div>
-        <div class="audio-player">
-          <h3 class="font-semibold mb-2">Dark Trap Vibe</h3>
-          <p class="text-white/70 text-sm mb-3">High-energy for bold posts & lives</p>
-          <iframe width="100%" height="52" scrolling="no" frameborder="no" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/1784567891&color=%23ff5500&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true"></iframe>
-        </div>
-        <div class="audio-player">
-          <h3 class="font-semibold mb-2">Luxury MENA Fusion</h3>
-          <p class="text-white/70 text-sm mb-3">Arabic-infused for Dubai creators</p>
-          <iframe width="100%" height="52" scrolling="no" frameborder="no" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/1784567892&color=%23ff5500&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true"></iframe>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <!-- PRICING & FORM -->
   <section id="custom" class="grad-purple py-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="grid lg:grid-cols-3 gap-10 items-start">
         <!-- PRICING TABLE -->
         <div class="lg:col-span-1">
-          <h2 class="text-3xl font-semibold mb-6">Choose Your Package</h2>
+          <h2 class="text-3xl font-semibold mb-6">Choose Your Tracks</h2>
+          <p class="text-white/80 mb-4">Each track includes exclusive rights, short edits for reels, and extended loops for lives. Scale up with more tracks.</p>
           <div class="paper rounded-2xl p-6 card">
             <table class="w-full text-sm">
               <thead>
                 <tr class="border-b border-white/10">
-                  <th class="text-left py-3">Package</th>
+                  <th class="text-left py-3"># Tracks</th>
                   <th class="text-right py-3">Price</th>
                   <th class="text-right py-3">Agency (5+)</th>
                 </tr>
               </thead>
               <tbody>
                 <tr class="border-b border-white/5">
-                  <td class="py-3">Basic</td>
+                  <td class="py-3">1 Track</td>
                   <td class="text-right font-semibold">$99</td>
                   <td class="text-right text-green-400">$79</td>
                 </tr>
                 <tr class="border-b border-white/5">
-                  <td class="py-3">Pro</td>
+                  <td class="py-3">2 Tracks</td>
                   <td class="text-right font-semibold">$149</td>
                   <td class="text-right text-green-400">$119</td>
                 </tr>
                 <tr>
-                  <td class="py-3">Elite</td>
+                  <td class="py-3">3 Tracks</td>
                   <td class="text-right font-semibold">$199</td>
                   <td class="text-right text-green-400">$159</td>
                 </tr>
               </tbody>
             </table>
-            <div class="mt-6 space-y-2 text-xs text-white/70">
-              <div><strong>Basic:</strong> 15s edit + 10min loop</div>
-              <div><strong>Pro:</strong> Full track + 20min loop + stems</div>
-              <div><strong>Elite:</strong> 3 variations + whitelisting + 30min loop</div>
+            <div class="mt-6 space-y-4 text-xs text-white/70">
+              <h3 class="font-semibold text-white text-sm">Included Per Track:</h3>
+              <ul class="list-disc pl-4 space-y-2">
+                <li><strong>Exclusive Rights:</strong> White-label license for your channels (OF, IG, TikTok, YT)—no claims, full ownership for ads/lives.</li>
+                <li><strong>15s Reel Edit:</strong> Perfect loop for TikTok/IG stories & teasers</li>
+                <li><strong>Full Track:</strong> 2-3 min custom instrumental</li>
+                <li><strong>Extended Loops:</strong> Seamless 10/20/30/60 min versions for OF lives/PPVs</li>
+                <li><strong>Files:</strong> WAV/MP3 + stems</li>
+              </ul>
+              <p class="text-white/60 text-xs mt-4">Agencies: 20% off for 5+ tracks total. Custom quotes for 20+.</p>
             </div>
           </div>
         </div>
@@ -143,7 +121,7 @@
         <!-- ENHANCED FORM -->
         <div class="lg:col-span-2">
           <h2 class="text-3xl font-semibold">Submit Your Brief</h2>
-          <p class="text-white/80 mt-2">Agencies: Submit for multiple creators. <strong>Pay only if approved.</strong></p>
+          <p class="text-white/80 mt-2">Describe your vibe(s)—one per track. Agencies: Note bulk needs. <strong>Pay only if you approve the preview.</strong></p>
 
           <form id="briefForm" class="mt-8 grid gap-4 paper rounded-2xl p-6 card" method="POST">
             <input type="text" name="_gotcha" class="hidden" tabindex="-1" autocomplete="off" />
@@ -159,20 +137,20 @@
             </select>
             
             <input name="roster_size" placeholder="Roster Size (if agency)" class="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10" />
-            <input name="handles" placeholder="Creator handles (OF/IG/TikTok)" class="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10" />
+            <input name="handles" placeholder="Creator handle or Agency name" class="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10" />
 
             <fieldset class="grid sm:grid-cols-3 gap-3">
               <label class="flex items-center gap-2 px-4 py-3 rounded-xl bg-black/40 border border-white/10 cursor-pointer">
-                <input type="radio" name="package" value="basic-99" required />
-                <span>Basic <span class="font-semibold">$99</span></span>
+                <input type="radio" name="package" value="1-track-99" required />
+                <span>1 Track <span class="font-semibold">$99</span></span>
               </label>
               <label class="flex items-center gap-2 px-4 py-3 rounded-xl bg-black/40 border border-white/10 cursor-pointer">
-                <input type="radio" name="package" value="pro-149" />
-                <span>Pro <span class="font-semibold">$149</span></span>
+                <input type="radio" name="package" value="2-tracks-149" />
+                <span>2 Tracks <span class="font-semibold">$149</span></span>
               </label>
               <label class="flex items-center gap-2 px-4 py-3 rounded-xl bg-black/40 border border-white/10 cursor-pointer">
-                <input type="radio" name="package" value="elite-199" />
-                <span>Elite <span class="font-semibold">$199</span></span>
+                <input type="radio" name="package" value="3-tracks-199" />
+                <span>3 Tracks <span class="font-semibold">$199</span></span>
               </label>
             </fieldset>
 
@@ -196,7 +174,7 @@
   <section id="agency" class="bg-[#0b0c0e] py-16">
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
       <h2 class="text-3xl font-semibold text-center mb-12">Agency Partnership Perks</h2>
-      <div class="grid md:grid-cols-3 gap-8">
+      <div class="grid md:grid-cols-2 gap-8">
         <div class="card rounded-2xl p-6 paper text-center">
           <h3 class="text-xl font-semibold mb-3">Bulk Pricing</h3>
           <p class="text-white/70">20% off for 5+ creators. Custom rates for 20+.</p>
@@ -204,10 +182,6 @@
         <div class="card rounded-2xl p-6 paper text-center">
           <h3 class="text-xl font-semibold mb-3">White-Label</h3>
           <p class="text-white/70">Credit your agency. Full stems for re-edits.</p>
-        </div>
-        <div class="card rounded-2xl p-6 paper text-center">
-          <h3 class="text-xl font-semibold mb-3">Rev-Share</h3>
-          <p class="text-white/70">10% on creator upsells via your referrals.</p>
         </div>
       </div>
     </div>
@@ -266,7 +240,7 @@
             <span class="font-medium">Agency bulk pricing?</span>
             <span class="text-white/50 group-open:rotate-180 transition">⌄</span>
           </summary>
-          <p class="text-white/70 mt-3">20% off for 5+ creators ($79/$119/$159). Custom rates for 20+. NDAs available.</p>
+          <p class="text-white/70 mt-3">20% off for 5+ creators ($79/$119/$159). Custom rates for 20+.</p>
         </details>
         <details class="group py-4">
           <summary class="flex items-center justify-between cursor-pointer">
@@ -288,7 +262,7 @@
             <span class="text-white/50 group-open:rotate-180 transition">⌄</span>
           </summary>
           <p class="text-white/70 mt-3">
-            High-quality WAV + MP3, a short edit for clips/reels, the full track, and perfectly looping background versions (10, 20, 30 minutes). Stems available on request.
+            High-quality WAV + MP3, a 15s edit for clips/reels, the full track, and perfectly looping background versions (10, 20, 30, 60 minutes). Stems available on request.
           </p>
         </details>
         <details class="group py-4">
@@ -296,7 +270,7 @@
             <span class="font-medium">Turnaround time?</span>
             <span class="text-white/50 group-open:rotate-180 transition">⌄</span>
           </summary>
-          <p class="text-white/70 mt-3">Typically 24–72 hours depending on your brief. I aim for 48h for most tracks.</p>
+          <p class="text-white/70 mt-3">24–48 hours for most tracks.</p>
         </details>
         <details class="group py-4">
           <summary class="flex items-center justify-between cursor-pointer">
@@ -330,7 +304,7 @@
             <input required name="name" placeholder="Name" class="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10" />
             <input required type="email" name="email" placeholder="Email" class="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10" />
           </div>
-          <input name="handle" placeholder="Creator handle (OnlyFans/IG/TikTok)" class="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10" />
+          <input name="handle" placeholder="Creator handle or Agency name" class="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10" />
           <textarea name="question" placeholder="Your question…" class="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 min-h-[140px]"></textarea>
           <button id="contactSubmit" class="justify-self-start px-6 py-3 rounded-xl bg-white text-black font-semibold">Send</button>
           <div id="contactMsg" class="mt-3 p-3 rounded-xl hide"></div>
@@ -344,8 +318,6 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-white/60">
       <p>© <span id="year"></span> Your Ghost Project. All rights reserved.</p>
       <div class="flex items-center gap-6">
-        <a href="#" class="hover:text-white">Privacy Policy</a>
-        <a href="#" class="hover:text-white">NDA Request</a>
         <a href="#contact" class="hover:text-white">Contact</a>
       </div>
     </div>
@@ -355,7 +327,7 @@
     // Year
     document.getElementById('year').textContent = new Date().getFullYear();
 
-    // Testimonials (9 creator + 3 agency)
+    // Testimonials (Generic agency names removed)
     const testimonials = [
       { quote: "Loop is so clean it feels infinite. No awkward cuts mid tease 😂", author: "— Ava • OF creator. Los Angeles" },
       { quote: "I wanted sexy but not cheesy. He nailed the tone and the loop just… works.", author: "— Leandra • OF creator. Paris" },
@@ -366,9 +338,9 @@
       { quote: "I've bought libraries before. This doesn't sound stock at all. It's sexy, not cheesy", author: "— Ren • OF creator. Paris" },
       { quote: "He nailed my reference track without copying it. Legal + vibey.", author: "— K • OF creator. LA" },
       { quote: "I've tried libraries. This feels made for my page, not generic sh***.", author: "— Naya • OF creator. San Diego" },
-      { quote: "20% agency discount made this a no-brainer for our roster", author: "— Sakura Mgmt • Agency" },
-      { quote: "White-label credits helped us brand the audio as ours", author: "— XCreator • Agency Lead" },
-      { quote: "Bulk workflow saved us 10+ hours per creator onboarding", author: "— Bunny Agency • Ops" }
+      { quote: "20% agency discount made this a no-brainer for our roster", author: "— Agency Lead • Management" },
+      { quote: "White-label credits helped us brand the audio as ours", author: "— Agency Manager • Operations" },
+      { quote: "Bulk workflow saved us 10+ hours per creator onboarding", author: "— Agency Director • Growth" }
     ];
     const container = document.getElementById('testimonialContainer');
     const tpl = document.getElementById('testimonialTemplate');
@@ -383,7 +355,7 @@
         container.appendChild(node);
       });
     }
-    document.getElementById('prevTestimonials').addEventListener('click', () => { page = (page + 11) % 4; renderTestimonials(); });
+    document.getElementById('prevTestimonials').addEventListener('click', () => { page = (page + 3) % 4; renderTestimonials(); });
     document.getElementById('nextTestimonials').addEventListener('click', () => { page = (page + 1) % 4; renderTestimonials(); });
     renderTestimonials();
 
