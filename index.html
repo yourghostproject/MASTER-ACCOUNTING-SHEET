@@ -73,7 +73,7 @@
   <section id="custom" class="grad-purple py-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="grid lg:grid-cols-3 gap-10 items-start">
-        <!-- PRICING TABLE -->
+        <!-- PRICING TABLE - NEVER CHANGES -->
         <div class="lg:col-span-1">
           <h2 class="text-3xl font-semibold mb-6">Choose Your Tracks</h2>
           <p class="text-white/80 mb-4">Each track includes exclusive rights, short edits for reels, and extended loops for lives.</p>
@@ -89,17 +89,17 @@
               <tbody>
                 <tr class="border-b border-white/5">
                   <td class="py-3">1 Track</td>
-                  <td class="text-right font-semibold" id="price1">$99</td>
+                  <td class="text-right font-semibold">$99</td>
                   <td class="text-right text-green-400">$79</td>
                 </tr>
                 <tr class="border-b border-white/5">
                   <td class="py-3">2 Tracks</td>
-                  <td class="text-right font-semibold" id="price2">$149</td>
+                  <td class="text-right font-semibold">$149</td>
                   <td class="text-right text-green-400">$119</td>
                 </tr>
                 <tr>
                   <td class="py-3">3 Tracks</td>
-                  <td class="text-right font-semibold" id="price3">$199</td>
+                  <td class="text-right font-semibold">$199</td>
                   <td class="text-right text-green-400">$159</td>
                 </tr>
               </tbody>
@@ -333,29 +333,20 @@
     // Year
     document.getElementById('year').textContent = new Date().getFullYear();
 
-    // === AGENCY PRICE AUTO-TWEAK ===
+    // === AGENCY PRICE AUTO-TWEAK - ONLY RADIO BUTTONS ===
     const userTypeSelect = document.getElementById('userType');
-    const price1 = document.getElementById('price1');
-    const price2 = document.getElementById('price2');
-    const price3 = document.getElementById('price3');
     const radioPrice1 = document.getElementById('radioPrice1');
     const radioPrice2 = document.getElementById('radioPrice2');
     const radioPrice3 = document.getElementById('radioPrice3');
 
     userTypeSelect.addEventListener('change', function() {
       if (this.value === 'agency') {
-        // Switch to agency prices
-        price1.textContent = '$79';
-        price2.textContent = '$119';
-        price3.textContent = '$159';
+        // ONLY RADIO BUTTONS change to agency prices
         radioPrice1.textContent = '$79';
         radioPrice2.textContent = '$119';
         radioPrice3.textContent = '$159';
       } else {
-        // Switch back to creator prices
-        price1.textContent = '$99';
-        price2.textContent = '$149';
-        price3.textContent = '$199';
+        // ONLY RADIO BUTTONS change back to creator prices
         radioPrice1.textContent = '$99';
         radioPrice2.textContent = '$149';
         radioPrice3.textContent = '$199';
