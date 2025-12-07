@@ -475,7 +475,7 @@
                         </div>
                         <div class="form-group">
                             <label>Amount (£)</label>
-                            <input type="number" id="expenseAmount" step="0.01" min="0" placeholder="0.00" required>
+                            <input type="number" id="expenseAmount" step="0.01" placeholder="0.00" required>
                         </div>
                         <div class="form-group">
                             <label>Category</label>
@@ -919,7 +919,7 @@
                 <div class="entry-item" style="border-left-color: #ff4444;">
                     <div class="entry-header">
                         <div>
-                            <div class="entry-amount" style="color: #ff4444;">-£${exp.amount.toFixed(2)}</div>
+                            <div class="entry-amount" style="color: #ff4444;">£${exp.amount >= 0 ? '-' + exp.amount.toFixed(2) : '+' + Math.abs(exp.amount).toFixed(2)}</div>
                             <div class="entry-details">
                                 ${new Date(exp.date).toLocaleDateString('en-GB')} • ${exp.category}
                             </div>
