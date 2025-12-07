@@ -613,7 +613,13 @@
         }
 
         function isBusinessTradingSource(source) {
-            return !isTaxExemptSource(source);
+            // Only business music income counts here
+            return (
+                source === 'Freelance Production' ||
+                source === 'MADM3N' ||
+                source === 'BESPØKE' ||
+                source === 'The Sound Atelier'
+            );
         }
 
         // Core data structure
@@ -962,7 +968,10 @@
             document.getElementById('currentBalance').textContent = `£${currentMonth.closingBalance.toFixed(2)}`;
             document.getElementById('monthIncome').textContent = `£${currentMonth.income.toFixed(2)}`;
 
-            const ytdIncome = data.income.reduce((sum, inc) => sum + inc.amount, 0);
+            // YTD Total Income: only business music income (Freelance Production, MADM3N, BESPØKE, The Sound Atelier)
+            const ytdIncome = data.income
+                .filter(inc => isBusinessTradingSource(inc.source))
+                .reduce((sum, inc) => sum + inc.amount, 0);
             document.getElementById('ytdIncome').textContent = `£${ytdIncome.toFixed(2)}`;
 
             const taxReserve = data.income.reduce((sum, inc) => sum + inc.tax, 0);
