@@ -437,14 +437,12 @@
                         <div class="form-group">
                             <label>Source</label>
                             <select id="incomeSource">
-                                <option>Ghost Production</option>
-                                <option>Fiverr Gig</option>
-                                <option>Sample Pack Sale</option>
-                                <option>Podcast Licensing</option>
-                                <option>DJ Service</option>
-                                <option>Custom Beat</option>
-                                <option>Meditation Music</option>
-                                <option>Other</option>
+                                <option>Freelance Production</option>
+                                <option>MADM3N</option>
+                                <option>BESPØKE</option>
+                                <option>The Sound Atelier</option>
+                                <option>Nicholson Salary</option>
+                                <option>Adjustment</option>
                             </select>
                         </div>
                     </div>
@@ -609,6 +607,15 @@
     </div>
 
     <script>
+        // Helpers for taxable / non-taxable income sources
+        function isTaxExemptSource(source) {
+            return source === 'Nicholson Salary' || source === 'Adjustment';
+        }
+
+        function isBusinessTradingSource(source) {
+            return !isTaxExemptSource(source);
+        }
+
         // Core data structure
         let data = {
             settings: {
@@ -772,15 +779,17 @@
             e.preventDefault();
 
             const amount = parseFloat(document.getElementById('incomeAmount').value);
+            const source = document.getElementById('incomeSource').value;
+            const taxRateEffective = isTaxExemptSource(source) ? 0 : (data.settings.taxRate / 100);
 
             const income = {
                 id: Date.now(),
                 date: document.getElementById('incomeDate').value,
                 description: document.getElementById('incomeDescription').value,
                 amount: amount,
-                source: document.getElementById('incomeSource').value,
-                tax: amount * (data.settings.taxRate / 100),
-                net: amount * (1 - data.settings.taxRate / 100)
+                source: source,
+                tax: amount * taxRateEffective,
+                net: amount * (1 - taxRateEffective)
             };
 
             data.income.push(income);
@@ -825,7 +834,7 @@
                         ${inc.description}
                     </div>
                     <div class="entry-details" style="margin-top: 8px;">
-                        Tax (${data.settings.taxRate}%): £${inc.tax.toFixed(2)} • Net: £${inc.net.toFixed(2)}
+                        Tax (${isTaxExemptSource(inc.source) ? '0' : data.settings.taxRate}%): £${inc.tax.toFixed(2)} • Net: £${inc.net.toFixed(2)}
                     </div>
                 </div>
             `).join('');
@@ -987,7 +996,9 @@
             const ytdIncome = data.income
                 .filter(inc => {
                     const incDate = new Date(inc.date);
-                    return incDate >= taxYearStart && incDate <= taxYearEnd;
+                    return incDate >= taxYearStart &&
+                           incDate <= taxYearEnd &&
+                           isBusinessTradingSource(inc.source);
                 })
                 .reduce((sum, inc) => sum + inc.amount, 0);
 
@@ -1038,11 +1049,14 @@
             data.settings.taxRate = parseFloat(document.getElementById('taxRate').value);
 
             // Recalculate tax for all income entries based on new tax rate
-            data.income = data.income.map(inc => ({
-                ...inc,
-                tax: inc.amount * (data.settings.taxRate / 100),
-                net: inc.amount * (1 - data.settings.taxRate / 100)
-            }));
+            data.income = data.income.map(inc => {
+                const taxRateEffective = isTaxExemptSource(inc.source) ? 0 : (data.settings.taxRate / 100);
+                return {
+                    ...inc,
+                    tax: inc.amount * taxRateEffective,
+                    net: inc.amount * (1 - taxRateEffective)
+                };
+            });
 
             document.getElementById('subtitleText').textContent =
                 `Freelance Music Production Business | Safety Threshold: £${(data.settings.safetyThreshold || 20000).toLocaleString()}`;
