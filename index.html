@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -172,7 +171,7 @@
         .status-critical { background-color: #ff4444; }
         .status-warning { background-color: #ffaa00; }
         .status-safe { background-color: #00ff00; }
-        .status-excellent { 
+        .status-excellent {
             background-color: #00ff00;
             animation: pulse 1.5s infinite;
         }
@@ -352,17 +351,6 @@
             font-size: 0.85em;
         }
 
-        .month-actions {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .month-actions button {
-            padding: 5px 10px;
-            font-size: 0.8em;
-        }
-
         input[type="file"] {
             padding: 5px;
         }
@@ -371,7 +359,7 @@
 <body>
     <div class="container">
         <h1>💼 Master Accounting Dashboard</h1>
-        <p class="subtitle">Freelance Music Production Business | Safety Threshold: £20,000</p>
+        <p class="subtitle" id="subtitleText">Freelance Music Production Business | Safety Threshold: £20,000</p>
 
         <!-- Quick Stats -->
         <div class="dashboard-grid">
@@ -388,18 +376,18 @@
                 <div class="value" id="ytdIncome">£0.00</div>
             </div>
             <div class="stat-card">
-                <h3>Tax Set Aside</h3>
+                <h3>Tax Set Aside (20%)</h3>
                 <div class="value" id="taxReserve">£0.00</div>
             </div>
         </div>
 
         <!-- Navigation Tabs -->
         <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('overview')">📊 Overview</button>
-            <button class="tab-btn" onclick="switchTab('income')">💰 Income</button>
-            <button class="tab-btn" onclick="switchTab('expenses')">💳 Expenses</button>
-            <button class="tab-btn" onclick="switchTab('tax')">📋 Tax Dashboard</button>
-            <button class="tab-btn" onclick="switchTab('settings')">⚙️ Settings</button>
+            <button class="tab-btn active" onclick="switchTab(event, 'overview')">📊 Overview</button>
+            <button class="tab-btn" onclick="switchTab(event, 'income')">💰 Income</button>
+            <button class="tab-btn" onclick="switchTab(event, 'expenses')">💳 Expenses</button>
+            <button class="tab-btn" onclick="switchTab(event, 'tax')">📋 Tax Dashboard</button>
+            <button class="tab-btn" onclick="switchTab(event, 'settings')">⚙️ Settings</button>
         </div>
 
         <!-- Overview Tab -->
@@ -463,6 +451,10 @@
                     <button type="submit">Add Income</button>
                 </form>
 
+                <p style="margin-top:15px;font-size:0.9em;color:#a0a0a0;">
+                    This month income total: <strong id="incomeMonthTotal">£0.00</strong>
+                </p>
+
                 <div class="entry-list" id="incomeList">
                     <!-- Populated by JavaScript -->
                 </div>
@@ -507,6 +499,10 @@
                     </div>
                     <button type="submit">Add Expense</button>
                 </form>
+
+                <p style="margin-top:15px;font-size:0.9em;color:#a0a0a0;">
+                    This month expenses total (excl. fixed living): <strong id="expenseMonthTotal">£0.00</strong>
+                </p>
 
                 <div class="entry-list" id="expenseList">
                     <!-- Populated by JavaScript -->
@@ -613,20 +609,20 @@
     </div>
 
     <script>
-        // Data structure
+        // Core data structure
         let data = {
             settings: {
                 safetyThreshold: 20000,
                 livingCosts: 2700,
                 taxRate: 20,
                 startingBalance: 28248,
-                startMonth: '2025-09'
+                startMonth: '2025-09' // YYYY-MM, 12 months forward
             },
             income: [],
             expenses: []
         };
 
-        // Initialize
+        // Initialize everything
         function init() {
             loadData();
             setDefaultDates();
@@ -640,14 +636,20 @@
         function loadData() {
             const saved = localStorage.getItem('accountingData');
             if (saved) {
-                data = JSON.parse(saved);
+                try {
+                    data = JSON.parse(saved);
+                } catch (e) {
+                    console.error('Error parsing saved data, resetting.', e);
+                }
             }
 
-            // Load settings to UI
+            // Load settings into UI
             if (data.settings) {
                 document.getElementById('safetyThreshold').value = data.settings.safetyThreshold || 20000;
                 document.getElementById('livingCosts').value = data.settings.livingCosts || 2700;
                 document.getElementById('taxRate').value = data.settings.taxRate || 20;
+                document.getElementById('subtitleText').textContent =
+                    `Freelance Music Production Business | Safety Threshold: £${(data.settings.safetyThreshold || 20000).toLocaleString()}`;
             }
         }
 
@@ -657,11 +659,13 @@
 
         function setDefaultDates() {
             const today = new Date().toISOString().split('T')[0];
-            document.getElementById('incomeDate').value = today;
-            document.getElementById('expenseDate').value = today;
+            const incomeDate = document.getElementById('incomeDate');
+            const expenseDate = document.getElementById('expenseDate');
+            if (incomeDate) incomeDate.value = today;
+            if (expenseDate) expenseDate.value = today;
         }
 
-        // Generate months array
+        // Generate 12 months from startMonth
         function generateMonths() {
             const months = [];
             const startDate = new Date(data.settings.startMonth + '-01');
@@ -678,13 +682,13 @@
             return months;
         }
 
-        // Calculate monthly data
+        // Calculate monthly projection + actuals
         function calculateMonthlyData() {
             const months = generateMonths();
             const monthlyData = [];
             let runningBalance = data.settings.startingBalance;
 
-            months.forEach((month, index) => {
+            months.forEach(month => {
                 const monthIncome = data.income
                     .filter(inc => inc.date.startsWith(month.date))
                     .reduce((sum, inc) => sum + parseFloat(inc.amount), 0);
@@ -714,7 +718,7 @@
             return monthlyData;
         }
 
-        // Get status class
+        // Status helpers (fixed thresholds as specified)
         function getStatusClass(balance) {
             if (balance < 18000) return 'status-critical';
             if (balance >= 18000 && balance <= 20000) return 'status-warning';
@@ -722,7 +726,6 @@
             return 'status-excellent';
         }
 
-        // Get status text
         function getStatusText(balance) {
             if (balance < 18000) return 'CRITICAL';
             if (balance >= 18000 && balance <= 20000) return 'WARNING';
@@ -730,7 +733,7 @@
             return 'EXCELLENT';
         }
 
-        // Render monthly table
+        // Render monthly overview table
         function renderMonthlyTable() {
             const monthlyData = calculateMonthlyData();
             const tbody = document.getElementById('monthlyTableBody');
@@ -768,14 +771,16 @@
         document.getElementById('incomeForm').addEventListener('submit', (e) => {
             e.preventDefault();
 
+            const amount = parseFloat(document.getElementById('incomeAmount').value);
+
             const income = {
                 id: Date.now(),
                 date: document.getElementById('incomeDate').value,
                 description: document.getElementById('incomeDescription').value,
-                amount: parseFloat(document.getElementById('incomeAmount').value),
+                amount: amount,
                 source: document.getElementById('incomeSource').value,
-                tax: parseFloat(document.getElementById('incomeAmount').value) * (data.settings.taxRate / 100),
-                net: parseFloat(document.getElementById('incomeAmount').value) * (1 - data.settings.taxRate / 100)
+                tax: amount * (data.settings.taxRate / 100),
+                net: amount * (1 - data.settings.taxRate / 100)
             };
 
             data.income.push(income);
@@ -789,10 +794,16 @@
             updateTaxDashboard();
         });
 
-        // Render income list
+        // Render income entries
         function renderIncome() {
             const list = document.getElementById('incomeList');
             const sortedIncome = [...data.income].sort((a, b) => new Date(b.date) - new Date(a.date));
+            const currentMonthStr = new Date().toISOString().slice(0, 7);
+            const monthTotal = data.income
+                .filter(inc => inc.date.startsWith(currentMonthStr))
+                .reduce((sum, inc) => sum + inc.amount, 0);
+
+            document.getElementById('incomeMonthTotal').textContent = `£${monthTotal.toFixed(2)}`;
 
             if (sortedIncome.length === 0) {
                 list.innerHTML = '<p style="text-align: center; color: #a0a0a0; padding: 20px;">No income entries yet</p>';
@@ -863,7 +874,7 @@
             updateTaxDashboard();
         });
 
-        // File to base64
+        // File to base64 helper
         function fileToBase64(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -873,10 +884,16 @@
             });
         }
 
-        // Render expenses list
+        // Render expense entries
         function renderExpenses() {
             const list = document.getElementById('expenseList');
             const sortedExpenses = [...data.expenses].sort((a, b) => new Date(b.date) - new Date(a.date));
+            const currentMonthStr = new Date().toISOString().slice(0, 7);
+            const monthTotal = data.expenses
+                .filter(exp => exp.date.startsWith(currentMonthStr) && exp.category !== 'Living')
+                .reduce((sum, exp) => sum + exp.amount, 0);
+
+            document.getElementById('expenseMonthTotal').textContent = `£${monthTotal.toFixed(2)}`;
 
             if (sortedExpenses.length === 0) {
                 list.innerHTML = '<p style="text-align: center; color: #a0a0a0; padding: 20px;">No expense entries yet</p>';
@@ -918,7 +935,7 @@
             }
         }
 
-        // View receipt
+        // View receipt in new window
         function viewReceipt(id) {
             const expense = data.expenses.find(exp => exp.id === id);
             if (expense && expense.receipt) {
@@ -927,7 +944,7 @@
             }
         }
 
-        // Update dashboard stats
+        // Update top dashboard stats
         function updateDashboard() {
             const monthlyData = calculateMonthlyData();
             const today = new Date().toISOString().slice(0, 7);
@@ -943,7 +960,7 @@
             document.getElementById('taxReserve').textContent = `£${taxReserve.toFixed(2)}`;
         }
 
-        // Calculate tax owed based on UK tax bands
+        // Tax calculation based on UK bands 2025/26
         function calculateTaxOwed(profit) {
             let tax = 0;
 
@@ -954,13 +971,15 @@
             } else if (profit <= 125140) {
                 tax = (50270 - 12570) * 0.20 + (profit - 50270) * 0.40;
             } else {
-                tax = (50270 - 12570) * 0.20 + (125140 - 50270) * 0.40 + (profit - 125140) * 0.45;
+                tax = (50270 - 12570) * 0.20 +
+                      (125140 - 50270) * 0.40 +
+                      (profit - 125140) * 0.45;
             }
 
             return tax;
         }
 
-        // Update tax dashboard
+        // Update tax dashboard (tax year 6 Apr 2025 - 5 Apr 2026)
         function updateTaxDashboard() {
             const taxYearStart = new Date('2025-04-06');
             const taxYearEnd = new Date('2026-04-05');
@@ -980,7 +999,7 @@
                 .reduce((sum, exp) => sum + exp.amount, 0);
 
             const taxableProfit = ytdIncome - ytdExpenses;
-            const estimatedTax = calculateTaxOwed(taxableProfit);
+            const estimatedTax = taxableProfit > 0 ? calculateTaxOwed(taxableProfit) : 0;
             const taxSetAside = ytdIncome * (data.settings.taxRate / 100);
             const taxDifference = taxSetAside - estimatedTax;
 
@@ -996,7 +1015,7 @@
         }
 
         // Tab switching
-        function switchTab(tabName) {
+        function switchTab(evt, tabName) {
             document.querySelectorAll('.tab-content').forEach(tab => {
                 tab.classList.remove('active');
             });
@@ -1004,8 +1023,12 @@
                 btn.classList.remove('active');
             });
 
-            document.getElementById(tabName).classList.add('active');
-            event.target.classList.add('active');
+            const tab = document.getElementById(tabName);
+            if (tab) tab.classList.add('active');
+
+            if (evt && evt.target) {
+                evt.target.classList.add('active');
+            }
         }
 
         // Save settings
@@ -1014,12 +1037,15 @@
             data.settings.livingCosts = parseFloat(document.getElementById('livingCosts').value);
             data.settings.taxRate = parseFloat(document.getElementById('taxRate').value);
 
-            // Recalculate tax for all income entries
+            // Recalculate tax for all income entries based on new tax rate
             data.income = data.income.map(inc => ({
                 ...inc,
                 tax: inc.amount * (data.settings.taxRate / 100),
                 net: inc.amount * (1 - data.settings.taxRate / 100)
             }));
+
+            document.getElementById('subtitleText').textContent =
+                `Freelance Music Production Business | Safety Threshold: £${(data.settings.safetyThreshold || 20000).toLocaleString()}`;
 
             saveData();
             renderMonthlyTable();
@@ -1029,7 +1055,7 @@
             alert('Settings saved successfully!');
         }
 
-        // Export data
+        // Export data as JSON (includes receipts)
         function exportData() {
             const dataStr = JSON.stringify(data, null, 2);
             const dataBlob = new Blob([dataStr], { type: 'application/json' });
@@ -1040,19 +1066,16 @@
             link.click();
         }
 
-        // Export CSV
+        // Export CSV (for accountant/HMRC)
         function exportCSV() {
-            let csv = 'Type,Date,Description,Amount,Category/Source,Tax,Net
-';
+            let csv = 'Type,Date,Description,Amount,Category/Source,Tax,Net\n';
 
             data.income.forEach(inc => {
-                csv += `Income,${inc.date},"${inc.description}",${inc.amount},${inc.source},${inc.tax},${inc.net}
-`;
+                csv += `Income,${inc.date},"${inc.description.replace(/"/g, '""')}",${inc.amount},${inc.source},${inc.tax},${inc.net}\n`;
             });
 
             data.expenses.forEach(exp => {
-                csv += `Expense,${exp.date},"${exp.description}",${exp.amount},${exp.category},,
-`;
+                csv += `Expense,${exp.date},"${exp.description.replace(/"/g, '""')}",${exp.amount},${exp.category},,\n`;
             });
 
             const blob = new Blob([csv], { type: 'text/csv' });
@@ -1063,7 +1086,7 @@
             link.click();
         }
 
-        // Import data
+        // Import JSON data
         function importData(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -1095,8 +1118,8 @@
             }
         }
 
-        // Initialize on load
-        init();
+        // Run init when page is fully loaded
+        window.addEventListener('load', init);
     </script>
 </body>
 </html>
