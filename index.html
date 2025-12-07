@@ -491,6 +491,13 @@
                             </select>
                         </div>
                         <div class="form-group">
+                            <label>Expense Type</label>
+                            <select id="expenseType">
+                                <option value="inside">Inside £2,700 baseline (no extra cash)</option>
+                                <option value="extra">Extra on top of £2,700</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
                             <label>Receipt (optional)</label>
                             <input type="file" id="expenseReceipt" accept="image/*,.pdf">
                         </div>
@@ -499,7 +506,7 @@
                 </form>
 
                 <p style="margin-top:15px;font-size:0.9em;color:#a0a0a0;">
-                    This month expenses total (excl. fixed living): <strong id="expenseMonthTotal">£0.00</strong>
+                    This month deductible expenses (all types): <strong id="expenseMonthTotal">£0.00</strong>
                 </p>
 
                 <div class="entry-list" id="expenseList">
@@ -656,6 +663,13 @@
                 }
             }
 
+            // Backwards compatibility: ensure every expense has a type
+            if (!data.expenses) data.expenses = [];
+            data.expenses = data.expenses.map(exp => ({
+                ...exp,
+                type: exp.type || 'extra' // old entries behave like extra cash expenses
+            }));
+
             // Load settings into UI
             if (data.settings) {
                 document.getElementById('safetyThreshold').value = data.settings.safetyThreshold || 20000;
@@ -706,12 +720,13 @@
                     .filter(inc => inc.date.startsWith(month.date))
                     .reduce((sum, inc) => sum + parseFloat(inc.amount), 0);
 
-                const monthExpenses = data.expenses
-                    .filter(exp => exp.date.startsWith(month.date))
+                // Only "extra" expenses hit cash beyond the £2,700 baseline
+                const monthCashExpenses = data.expenses
+                    .filter(exp => exp.date.startsWith(month.date) && exp.type === 'extra')
                     .reduce((sum, exp) => sum + parseFloat(exp.amount), 0);
 
                 const openingBalance = runningBalance;
-                const netChange = monthIncome - data.settings.livingCosts - monthExpenses;
+                const netChange = monthIncome - data.settings.livingCosts - monthCashExpenses;
                 const closingBalance = openingBalance + netChange;
 
                 monthlyData.push({
@@ -720,7 +735,7 @@
                     openingBalance,
                     income: monthIncome,
                     livingCosts: data.settings.livingCosts,
-                    expenses: monthExpenses,
+                    expenses: monthCashExpenses,
                     netChange,
                     closingBalance
                 });
@@ -875,6 +890,7 @@
                 description: document.getElementById('expenseDescription').value,
                 amount: parseFloat(document.getElementById('expenseAmount').value),
                 category: document.getElementById('expenseCategory').value,
+                type: document.getElementById('expenseType').value, // 'inside' or 'extra'
                 receipt: receiptData
             };
 
@@ -904,8 +920,10 @@
             const list = document.getElementById('expenseList');
             const sortedExpenses = [...data.expenses].sort((a, b) => new Date(b.date) - new Date(a.date));
             const currentMonthStr = new Date().toISOString().slice(0, 7);
+
+            // All expenses (inside + extra) are deductible for tax purposes here
             const monthTotal = data.expenses
-                .filter(exp => exp.date.startsWith(currentMonthStr) && exp.category !== 'Living')
+                .filter(exp => exp.date.startsWith(currentMonthStr))
                 .reduce((sum, exp) => sum + exp.amount, 0);
 
             document.getElementById('expenseMonthTotal').textContent = `£${monthTotal.toFixed(2)}`;
@@ -919,9 +937,11 @@
                 <div class="entry-item" style="border-left-color: #ff4444;">
                     <div class="entry-header">
                         <div>
-                            <div class="entry-amount" style="color: #ff4444;">£${exp.amount >= 0 ? '-' + exp.amount.toFixed(2) : '+' + Math.abs(exp.amount).toFixed(2)}</div>
+                            <div class="entry-amount" style="color: #ff4444;">
+                                £${exp.amount >= 0 ? '-' + exp.amount.toFixed(2) : '+' + Math.abs(exp.amount).toFixed(2)}
+                            </div>
                             <div class="entry-details">
-                                ${new Date(exp.date).toLocaleDateString('en-GB')} • ${exp.category}
+                                ${new Date(exp.date).toLocaleDateString('en-GB')} • ${exp.category} • ${exp.type === 'inside' ? 'Inside £2.7k' : 'Extra'}
                             </div>
                         </div>
                         <button class="delete-btn" onclick="deleteExpense(${exp.id})">Delete</button>
@@ -1011,10 +1031,11 @@
                 })
                 .reduce((sum, inc) => sum + inc.amount, 0);
 
+            // All expenses (inside + extra) treated as deductible here
             const ytdExpenses = data.expenses
                 .filter(exp => {
                     const expDate = new Date(exp.date);
-                    return expDate >= taxYearStart && expDate <= taxYearEnd && exp.category !== 'Living';
+                    return expDate >= taxYearStart && expDate <= taxYearEnd;
                 })
                 .reduce((sum, exp) => sum + exp.amount, 0);
 
@@ -1091,14 +1112,14 @@
 
         // Export CSV (for accountant/HMRC)
         function exportCSV() {
-            let csv = 'Type,Date,Description,Amount,Category/Source,Tax,Net\n';
+            let csv = 'Type,Date,Description,Amount,Category/Source,Tax,Net,ExpenseType\n';
 
             data.income.forEach(inc => {
-                csv += `Income,${inc.date},"${inc.description.replace(/"/g, '""')}",${inc.amount},${inc.source},${inc.tax},${inc.net}\n`;
+                csv += `Income,${inc.date},"${inc.description.replace(/"/g, '""')}",${inc.amount},${inc.source},${inc.tax},${inc.net},\n`;
             });
 
             data.expenses.forEach(exp => {
-                csv += `Expense,${exp.date},"${exp.description.replace(/"/g, '""')}",${exp.amount},${exp.category},,\n`;
+                csv += `Expense,${exp.date},"${exp.description.replace(/"/g, '""')}",${exp.amount},${exp.category},,,${exp.type}\n`;
             });
 
             const blob = new Blob([csv], { type: 'text/csv' });
