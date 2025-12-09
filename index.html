@@ -232,6 +232,11 @@
             z-index: 1;
         }
 
+        /* Forecast column styling */
+        .forecast-col {
+            background: rgba(245, 158, 11, 0.15);
+        }
+
         tr:hover {
             background: rgba(30, 64, 175, 0.18);
         }
@@ -544,6 +549,7 @@
             <button class="tab-btn active" onclick="switchTab(event, 'overview')">📊 Overview</button>
             <button class="tab-btn" onclick="switchTab(event, 'income')">💰 Income</button>
             <button class="tab-btn" onclick="switchTab(event, 'expenses')">💳 Expenses</button>
+            <button class="tab-btn" onclick="switchTab(event, 'forecast')">🔮 Forecast</button>
             <button class="tab-btn" onclick="switchTab(event, 'tax')">📋 Tax Dashboard</button>
             <button class="tab-btn" onclick="switchTab(event, 'settings')">⚙️ Settings</button>
         </div>
@@ -564,6 +570,7 @@
                                 <th>Cash Adjustments</th>
                                 <th>Net Change</th>
                                 <th>Closing Balance</th>
+                                <th class="forecast-col">Forecasted Balance</th>
                                 <th>Status</th>
                             </tr>
                         </thead>
@@ -704,6 +711,38 @@
             </div>
         </div>
 
+        <!-- Forecast Tab -->
+        <div id="forecast" class="tab-content">
+            <div class="section">
+                <h2>Future Income Forecast</h2>
+                <form id="forecastForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Expected Date</label>
+                            <input type="date" id="forecastDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Expected Amount (£)</label>
+                            <input type="number" id="forecastAmount" step="0.01" min="0" placeholder="0.00" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <input type="text" id="forecastDescription" placeholder="e.g., Pending invoice - Client X" required>
+                        </div>
+                    </div>
+                    <button type="submit">Add Forecast Entry</button>
+                </form>
+
+                <p style="margin-top:10px;font-size:0.8em;color:#9ca3af;">
+                    Use this to simulate potential future income that you know will come but hasn't been invoiced or received yet. These entries won't affect your actual balance or taxes until you convert them to real income.
+                </p>
+
+                <div class="entry-list" id="forecastList">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
         <!-- Tax Dashboard Tab -->
         <div id="tax" class="tab-content">
             <div class="section">
@@ -809,7 +848,6 @@
         }
 
         function isBusinessTradingSource(source) {
-            // Only business music income counts here
             return (
                 source === 'Freelance Production' ||
                 source === 'MADM3N' ||
@@ -825,11 +863,12 @@
                 livingCosts: 2700,
                 taxRate: 20,
                 startingBalance: 28248,
-                startMonth: '2025-09' // YYYY-MM, 12 months forward
+                startMonth: '2025-09'
             },
             income: [],
             expenses: [],
-            adjustments: []
+            adjustments: [],
+            forecasts: []
         };
 
         // Initialize everything
@@ -840,6 +879,7 @@
             renderIncome();
             renderExpenses();
             renderAdjustments();
+            renderForecasts();
             updateDashboard();
             updateTaxDashboard();
         }
@@ -857,14 +897,13 @@
             if (!data.income) data.income = [];
             if (!data.expenses) data.expenses = [];
             if (!data.adjustments) data.adjustments = [];
+            if (!data.forecasts) data.forecasts = [];
 
-            // Backwards compatibility: ensure every expense has a type
             data.expenses = data.expenses.map(exp => ({
                 ...exp,
-                type: exp.type || 'extra' // old entries behave like extra cash expenses
+                type: exp.type || 'extra'
             }));
 
-            // Load settings into UI
             if (data.settings) {
                 document.getElementById('safetyThreshold').value = data.settings.safetyThreshold || 20000;
                 document.getElementById('livingCosts').value = data.settings.livingCosts || 2700;
@@ -880,15 +919,12 @@
 
         function setDefaultDates() {
             const today = new Date().toISOString().split('T')[0];
-            const incomeDate = document.getElementById('incomeDate');
-            const expenseDate = document.getElementById('expenseDate');
-            const adjustmentDate = document.getElementById('adjustmentDate');
-            if (incomeDate) incomeDate.value = today;
-            if (expenseDate) expenseDate.value = today;
-            if (adjustmentDate) adjustmentDate.value = today;
+            ['incomeDate', 'expenseDate', 'adjustmentDate', 'forecastDate'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = today;
+            });
         }
 
-        // Generate 12 months from startMonth
         function generateMonths() {
             const months = [];
             const startDate = new Date(data.settings.startMonth + '-01');
@@ -905,7 +941,6 @@
             return months;
         }
 
-        // Calculate monthly projection + actuals
         function calculateMonthlyData() {
             const months = generateMonths();
             const monthlyData = [];
@@ -916,7 +951,6 @@
                     .filter(inc => inc.date.startsWith(month.date))
                     .reduce((sum, inc) => sum + parseFloat(inc.amount), 0);
 
-                // Only "extra" expenses hit cash beyond the £2,700 baseline
                 const monthCashExpenses = data.expenses
                     .filter(exp => exp.date.startsWith(month.date) && exp.type === 'extra')
                     .reduce((sum, exp) => sum + parseFloat(exp.amount), 0);
@@ -925,9 +959,14 @@
                     .filter(adj => adj.date.startsWith(month.date))
                     .reduce((sum, adj) => sum + parseFloat(adj.amount), 0);
 
+                const monthForecasts = data.forecasts
+                    .filter(fc => fc.date.startsWith(month.date))
+                    .reduce((sum, fc) => sum + parseFloat(fc.amount), 0);
+
                 const openingBalance = runningBalance;
                 const netChange = monthIncome - data.settings.livingCosts - monthCashExpenses + monthAdjustments;
                 const closingBalance = openingBalance + netChange;
+                const forecastedBalance = closingBalance + monthForecasts;
 
                 monthlyData.push({
                     month: month.label,
@@ -937,8 +976,10 @@
                     livingCosts: data.settings.livingCosts,
                     expenses: monthCashExpenses,
                     adjustments: monthAdjustments,
+                    forecasts: monthForecasts,
                     netChange,
-                    closingBalance
+                    closingBalance,
+                    forecastedBalance
                 });
 
                 runningBalance = closingBalance;
@@ -947,7 +988,6 @@
             return monthlyData;
         }
 
-        // Status helpers (fixed thresholds as specified)
         function getStatusClass(balance) {
             if (balance < 18000) return 'status-critical';
             if (balance >= 18000 && balance <= 20000) return 'status-warning';
@@ -962,7 +1002,13 @@
             return 'EXCELLENT';
         }
 
-        // Render monthly overview table
+        function getStatusColor(balance) {
+            if (balance < 18000) return '#ef4444';
+            if (balance >= 18000 && balance <= 20000) return '#f59e0b';
+            if (balance > 20000 && balance <= 30000) return '#22c55e';
+            return '#22c55e';
+        }
+
         function renderMonthlyTable() {
             const monthlyData = calculateMonthlyData();
             const tbody = document.getElementById('monthlyTableBody');
@@ -972,6 +1018,7 @@
                 const isCurrent = month.date === today;
                 const statusClass = getStatusClass(month.closingBalance);
                 const statusText = getStatusText(month.closingBalance);
+                const forecastColor = getStatusColor(month.forecastedBalance);
 
                 return `
                     <tr class="${isCurrent ? 'current-month' : ''}">
@@ -990,6 +1037,9 @@
                             £${month.netChange.toFixed(2)}
                         </td>
                         <td>£${month.closingBalance.toFixed(2)}</td>
+                        <td class="forecast-col" style="color: ${forecastColor}; font-weight: 700;">
+                            £${month.forecastedBalance.toFixed(2)}
+                        </td>
                         <td>
                             <span class="status-indicator ${statusClass}"></span>
                             ${statusText}
@@ -999,7 +1049,7 @@
             }).join('');
         }
 
-        // Income form submission
+        // Income form
         document.getElementById('incomeForm').addEventListener('submit', (e) => {
             e.preventDefault();
 
@@ -1028,7 +1078,6 @@
             updateTaxDashboard();
         });
 
-        // Render income entries
         function renderIncome() {
             const list = document.getElementById('incomeList');
             const sortedIncome = [...data.income].sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -1065,7 +1114,6 @@
             `).join('');
         }
 
-        // Delete income
         function deleteIncome(id) {
             if (confirm('Delete this income entry?')) {
                 data.income = data.income.filter(inc => inc.id !== id);
@@ -1077,7 +1125,7 @@
             }
         }
 
-        // Expense form submission
+        // Expense form
         document.getElementById('expenseForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -1094,7 +1142,7 @@
                 description: document.getElementById('expenseDescription').value,
                 amount: parseFloat(document.getElementById('expenseAmount').value),
                 category: document.getElementById('expenseCategory').value,
-                type: document.getElementById('expenseType').value, // 'inside' or 'extra'
+                type: document.getElementById('expenseType').value,
                 receipt: receiptData
             };
 
@@ -1109,7 +1157,6 @@
             updateTaxDashboard();
         });
 
-        // File to base64 helper
         function fileToBase64(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -1119,13 +1166,11 @@
             });
         }
 
-        // Render expense entries
         function renderExpenses() {
             const list = document.getElementById('expenseList');
             const sortedExpenses = [...data.expenses].sort((a, b) => new Date(b.date) - new Date(a.date));
             const currentMonthStr = new Date().toISOString().slice(0, 7);
 
-            // All expenses (inside + extra) are deductible for tax purposes here
             const monthTotal = data.expenses
                 .filter(exp => exp.date.startsWith(currentMonthStr))
                 .reduce((sum, exp) => sum + exp.amount, 0);
@@ -1162,7 +1207,6 @@
             `).join('');
         }
 
-        // Delete expense
         function deleteExpense(id) {
             if (confirm('Delete this expense entry?')) {
                 data.expenses = data.expenses.filter(exp => exp.id !== id);
@@ -1174,7 +1218,6 @@
             }
         }
 
-        // View receipt in new window
         function viewReceipt(id) {
             const expense = data.expenses.find(exp => exp.id === id);
             if (expense && expense.receipt) {
@@ -1183,7 +1226,7 @@
             }
         }
 
-        // Adjustments form submission
+        // Adjustments form
         document.getElementById('adjustmentForm').addEventListener('submit', (e) => {
             e.preventDefault();
 
@@ -1204,7 +1247,6 @@
             updateDashboard();
         });
 
-        // Render adjustments
         function renderAdjustments() {
             const list = document.getElementById('adjustmentList');
             const sorted = [...data.adjustments].sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -1244,7 +1286,64 @@
             }
         }
 
-        // Update top dashboard stats
+        // Forecasts form
+        document.getElementById('forecastForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const forecast = {
+                id: Date.now(),
+                date: document.getElementById('forecastDate').value,
+                amount: parseFloat(document.getElementById('forecastAmount').value),
+                description: document.getElementById('forecastDescription').value
+            };
+
+            data.forecasts.push(forecast);
+            saveData();
+
+            e.target.reset();
+            setDefaultDates();
+            renderForecasts();
+            renderMonthlyTable();
+        });
+
+        function renderForecasts() {
+            const list = document.getElementById('forecastList');
+            const sorted = [...data.forecasts].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            if (sorted.length === 0) {
+                list.innerHTML = '<p style="text-align: center; color: #9ca3af; padding: 20px;">No forecast entries yet</p>';
+                return;
+            }
+
+            list.innerHTML = sorted.map(fc => `
+                <div class="entry-item" style="border-left-color: #f59e0b;">
+                    <div class="entry-header">
+                        <div>
+                            <div class="entry-amount" style="color: #f59e0b;">
+                                £+${fc.amount.toFixed(2)}
+                            </div>
+                            <div class="entry-details">
+                                ${new Date(fc.date).toLocaleDateString('en-GB')} • Forecast (not invoiced)
+                            </div>
+                        </div>
+                        <button class="delete-btn" onclick="deleteForecast(${fc.id})">Delete</button>
+                    </div>
+                    <div class="entry-details">
+                        ${fc.description}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function deleteForecast(id) {
+            if (confirm('Delete this forecast entry?')) {
+                data.forecasts = data.forecasts.filter(fc => fc.id !== id);
+                saveData();
+                renderForecasts();
+                renderMonthlyTable();
+            }
+        }
+
         function updateDashboard() {
             const monthlyData = calculateMonthlyData();
             const today = new Date().toISOString().slice(0, 7);
@@ -1253,7 +1352,6 @@
             document.getElementById('currentBalance').textContent = `£${currentMonth.closingBalance.toFixed(2)}`;
             document.getElementById('monthIncome').textContent = `£${currentMonth.income.toFixed(2)}`;
 
-            // YTD Total Income: only business music income (Freelance Production, MADM3N, BESPØKE, The Sound Atelier)
             const ytdIncome = data.income
                 .filter(inc => isBusinessTradingSource(inc.source))
                 .reduce((sum, inc) => sum + inc.amount, 0);
@@ -1263,7 +1361,6 @@
             document.getElementById('taxReserve').textContent = `£${taxReserve.toFixed(2)}`;
         }
 
-        // Tax calculation based on UK bands 2025/26
         function calculateTaxOwed(profit) {
             let tax = 0;
 
@@ -1282,7 +1379,6 @@
             return tax;
         }
 
-        // Update tax dashboard (tax year 6 Apr 2025 - 5 Apr 2026)
         function updateTaxDashboard() {
             const taxYearStart = new Date('2025-04-06');
             const taxYearEnd = new Date('2026-04-05');
@@ -1296,7 +1392,6 @@
                 })
                 .reduce((sum, inc) => sum + inc.amount, 0);
 
-            // All expenses (inside + extra) treated as deductible here
             const ytdExpenses = data.expenses
                 .filter(exp => {
                     const expDate = new Date(exp.date);
@@ -1320,11 +1415,9 @@
             diffElement.className = taxDifference >= 0 ? 'amount positive' : 'amount negative';
         }
 
-        // Trading-style live clocks
         function updateClocks() {
             const now = new Date();
 
-            // Full local clock (day, date, month, year, time)
             const fullOptions = {
                 weekday: 'short',
                 year: 'numeric',
@@ -1366,7 +1459,6 @@
             }
         }
 
-        // Tab switching
         function switchTab(evt, tabName) {
             document.querySelectorAll('.tab-content').forEach(tab => {
                 tab.classList.remove('active');
@@ -1383,13 +1475,11 @@
             }
         }
 
-        // Save settings
         function saveSettings() {
             data.settings.safetyThreshold = parseFloat(document.getElementById('safetyThreshold').value);
             data.settings.livingCosts = parseFloat(document.getElementById('livingCosts').value);
             data.settings.taxRate = parseFloat(document.getElementById('taxRate').value);
 
-            // Recalculate tax for all income entries based on new tax rate
             data.income = data.income.map(inc => {
                 const taxRateEffective = isTaxExemptSource(inc.source) ? 0 : (data.settings.taxRate / 100);
                 return {
@@ -1410,7 +1500,6 @@
             alert('Settings saved successfully!');
         }
 
-        // Export data as JSON (includes receipts)
         function exportData() {
             const dataStr = JSON.stringify(data, null, 2);
             const dataBlob = new Blob([dataStr], { type: 'application/json' });
@@ -1421,7 +1510,6 @@
             link.click();
         }
 
-        // Export CSV (for accountant/HMRC)
         function exportCSV() {
             let csv = 'Type,Date,Description,Amount,Category/Source,Tax,Net,ExpenseType\n';
 
@@ -1437,6 +1525,10 @@
                 csv += `Adjustment,${adj.date},"${adj.description.replace(/"/g, '""')}",${adj.amount},Cash Adjustment,,, \n`;
             });
 
+            data.forecasts.forEach(fc => {
+                csv += `Forecast,${fc.date},"${fc.description.replace(/"/g, '""')}",${fc.amount},Future Income,,, \n`;
+            });
+
             const blob = new Blob([csv], { type: 'text/csv' });
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
@@ -1445,7 +1537,6 @@
             link.click();
         }
 
-        // Import JSON data
         function importData(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -1458,6 +1549,7 @@
                         data = imported;
 
                         if (!data.adjustments) data.adjustments = [];
+                        if (!data.forecasts) data.forecasts = [];
 
                         saveData();
                         init();
@@ -1470,7 +1562,6 @@
             reader.readAsText(file);
         }
 
-        // Clear all data
         function clearAllData() {
             if (confirm('This will delete ALL data permanently. Are you sure?')) {
                 if (confirm('Really sure? This cannot be undone!')) {
@@ -1480,11 +1571,10 @@
             }
         }
 
-        // Run init and start clocks when page is fully loaded
         window.addEventListener('load', () => {
             init();
             updateClocks();
-            setInterval(updateClocks, 1000); // update every second
+            setInterval(updateClocks, 1000);
         });
     </script>
 </body>
