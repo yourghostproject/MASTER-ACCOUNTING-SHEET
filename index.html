@@ -941,10 +941,12 @@
             return months;
         }
 
+        // Calculate monthly projection + actuals WITH CUMULATIVE FORECASTS
         function calculateMonthlyData() {
             const months = generateMonths();
             const monthlyData = [];
             let runningBalance = data.settings.startingBalance;
+            let runningForecastBalance = data.settings.startingBalance;
 
             months.forEach(month => {
                 const monthIncome = data.income
@@ -966,7 +968,9 @@
                 const openingBalance = runningBalance;
                 const netChange = monthIncome - data.settings.livingCosts - monthCashExpenses + monthAdjustments;
                 const closingBalance = openingBalance + netChange;
-                const forecastedBalance = closingBalance + monthForecasts;
+
+                // FIXED: Forecasted balance now cumulative
+                const forecastedBalance = runningForecastBalance + netChange + monthForecasts;
 
                 monthlyData.push({
                     month: month.label,
@@ -983,6 +987,7 @@
                 });
 
                 runningBalance = closingBalance;
+                runningForecastBalance = forecastedBalance; // Update running forecast balance
             });
 
             return monthlyData;
